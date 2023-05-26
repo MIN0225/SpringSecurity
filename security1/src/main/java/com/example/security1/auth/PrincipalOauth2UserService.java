@@ -1,5 +1,8 @@
 package com.example.security1.auth;
 
+import com.example.security1.auth.userinfo.GoogleUserInfo;
+import com.example.security1.auth.userinfo.NaverUserInfo;
+import com.example.security1.auth.userinfo.OAuth2UserInfo;
 import com.example.security1.domain.Role;
 import com.example.security1.domain.User;
 import com.example.security1.repository.UserRepository;
@@ -25,14 +28,23 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
 
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        String provider = userRequest.getClientRegistration().getRegistrationId();    //google
-        String providerId = oAuth2User.getAttribute("sub");
-        String username = provider+"_"+providerId;  			// 사용자가 입력한 적은 없지만 만들어준다
+        OAuth2UserInfo oAuth2UserInfo = null;
+        String provider = userRequest.getClientRegistration().getRegistrationId();
+
+        if(provider.equals("google")){
+            oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
+        }
+        else if(provider.equals("naver")){
+            oAuth2UserInfo = new NaverUserInfo(oAuth2User.getAttributes());
+        }
+
+        String providerId = oAuth2UserInfo.getProviderId();	//수정
+        String username = provider+"_"+providerId;
 
         String uuid = UUID.randomUUID().toString().substring(0, 6);
-        String password = bCryptPasswordEncoder.encode("패스워드"+uuid);  // 사용자가 입력한 적은 없지만 만들어준다
+        String password = bCryptPasswordEncoder.encode("패스워드"+uuid);
 
-        String email = oAuth2User.getAttribute("email");
+        String email = oAuth2UserInfo.getEmail();	//수정
         Role role = Role.ROLE_USER;
 
         User byUsername = userRepository.findByUsername(username);
@@ -46,6 +58,6 @@ public class PrincipalOauth2UserService extends DefaultOAuth2UserService {
             userRepository.save(byUsername);
         }
 
-        return new PrincipalDetails(byUsername, oAuth2User.getAttributes());
+        return new PrincipalDetails(byUsername, oAuth2UserInfo);	//수정
     }
 }
