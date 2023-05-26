@@ -13,11 +13,16 @@ spring:
     url: jdbc:mysql://localhost:3306/security?serverTimezone=Asia/Seoul
     username: cos
     password: cos1234
-
-#  mvc:
-#    view:
-#      prefix: /templates/
-#      suffix: .mustache
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 84746913795-k30oubqg1dpgkrb1f55hfbb4g989pp8d.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - profile
+              - email
 
   jpa:
     hibernate:
@@ -25,3 +30,7 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
     show-sql: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
